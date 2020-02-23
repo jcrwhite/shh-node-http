@@ -1,0 +1,27 @@
+{
+  "name": "shh-node-http",
+  "version": "1.0.0",
+  "description": "A simple Promise wrapper around the Node.JS http(s) ClientRequest",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jcrwhite/shh-node-http.git"
+  },
+  "keywords": [
+    "HTTP",
+    "HTTPS",
+    "node",
+    "nodejs",
+    "request",
+    "promise"
+  ],
+  "author": "Josh White",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jcrwhite/shh-node-http/issues"
+  },
+  "homepage": "https://github.com/jcrwhite/shh-node-http#readme"
+}
