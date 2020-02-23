@@ -18,7 +18,11 @@
     "request",
     "promise"
   ],
-  "author": "Josh White",
+  "author": {
+    "name": "Josh White",
+    "email": "coding.in.the.clouds@gmail.com",
+    "url": "https://github.com/jcrwhite"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/jcrwhite/shh-node-http/issues"
