@@ -27,5 +27,6 @@
   "bugs": {
     "url": "https://github.com/jcrwhite/shh-node-http/issues"
   },
-  "homepage": "https://github.com/jcrwhite/shh-node-http#readme"
+  "homepage": "https://github.com/jcrwhite/shh-node-http#readme",
+  "types": "types/index.d.ts"
 }

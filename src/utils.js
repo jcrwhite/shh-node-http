@@ -17,4 +17,4 @@ const assertStatus = response =>
     }
   });
 
-exports.assertStatus = assertStatus;
+module.exports = { assertStatus };

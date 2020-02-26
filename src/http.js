@@ -238,9 +238,11 @@ const _delete = (url, body = null, options) =>
     ...options
   }).then(response => assertStatus(response));
 
-exports.get = _get;
-exports.put = _put;
-exports.patch = _patch;
-exports.post = _post;
-exports.delete = _delete;
-exports.request = shhHTTP;
+module.exports = {
+  get: _get,
+  put: _put,
+  patch: _patch,
+  post: _post,
+  delete: _delete,
+  request: shhHTTP
+};
