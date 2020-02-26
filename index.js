@@ -7,6 +7,6 @@ module.exports = {
 };
 
 module.exports.default = {
-  http,
+  http: shhHTTP,
   utils
 };
