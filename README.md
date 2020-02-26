@@ -18,6 +18,24 @@ It supports:
 
 shh-node-http has 0 (zero) dependencies, is under 250 LOC including comments / whitespace, and completely exposes the native Node request / response objects so nothing is hidden from you.
 
+## Usage
+
+```ts
+const { http } = require('shh-node-http');
+
+http.post(url: string, body: any, options?: Object)
+  .then(response => doSomething(response))
+  .catch(e => handleError(e));
+```
+
+### Options
+
+- params - `{ key: value }` query parameters (default `null`)
+- json - `true|false` encodes and parses the request body as JSON (default `true`)
+- form - `true|false` form encodes and parses the request body (default `false`)
+- timeout - `number` request timeout in milliseconds, the request will be canceled and the Promise will be rejected once this value is reached (default `30000` - 30 seconds)
+- follow_redirects - `true|false` whether to follow http redirects (default `true`)
+
 ## Examples
 
 ### plain html get:
@@ -27,6 +45,20 @@ const { http } = require('shh-node-http');
 
 http
   .get('https://www.google.com/', { json: false })
+  .then(response => {
+    console.log('status: ', response.statusCode);
+    console.log('message: ', response.statusMessage);
+  })
+  .catch(e => console.error('request failed with error: ', e));
+```
+
+### passing query parameetrs
+
+```js
+const { http } = require('shh-node-http');
+
+http
+  .get('https://my-cool-rest-api.com/api/v1/users', { params: { name: 'Bob' } })
   .then(response => {
     console.log('status: ', response.statusCode);
     console.log('message: ', response.statusMessage);
