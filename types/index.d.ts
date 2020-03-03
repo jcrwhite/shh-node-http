@@ -12,7 +12,7 @@ export interface ShhOptions {
   params: object;
 }
 
-export interface IshhHTTP {
+export interface shhHTTP {
   get(url: string, options?: ShhOptions): Promise<ShhResponse>;
   put(url: string, body: any, options?: ShhOptions): Promise<ShhResponse>;
   patch(url: string, body: any, options?: ShhOptions): Promise<ShhResponse>;
@@ -21,6 +21,6 @@ export interface IshhHTTP {
   request(method: string, url: string, body: any, options: ShhOptions): Promise<ShhResponse>;
 }
 
-declare const shhHTTP: IshhHTTP;
+declare const http: shhHTTP;
 
-export default shhHTTP;
+export default http;
