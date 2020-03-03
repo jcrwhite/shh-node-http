@@ -1,6 +1,6 @@
 {
   "name": "shh-node-http",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A simple Promise wrapper around the Node.JS http(s) ClientRequest",
   "main": "index.js",
   "scripts": {
