@@ -31,6 +31,7 @@ http.post(url: string, body: any, options?: Object)
 ### Options
 
 - params - `{ key: value }` query parameters (default `null`)
+- headers - `{ key: value }` http headers (automatically applies `Content-Type, Content-Length`)
 - json - `true|false` encodes and parses the request body as JSON (default `true`)
 - form - `true|false` form encodes and parses the request body (default `false`)
 - timeout - `number` request timeout in milliseconds, the request will be canceled and the Promise will be rejected once this value is reached (default `30000` - 30 seconds)
