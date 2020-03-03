@@ -21,6 +21,9 @@ export interface Shh {
   request(method: string, url: string, body: any, options: ShhOptions): Promise<ShhResponse>;
 }
 
-declare const shh: Shh;
+declare const shh: {
+  shh: Shh;
+  utils: any;
+};
 
 export default shh;
