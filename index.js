@@ -1,12 +1,9 @@
-const shhHTTP = require('./lib/http');
+const shh = require('./lib/http');
 const utils = require('./lib/utils');
 
 module.exports = {
-  http: shhHTTP,
+  shh,
   utils
 };
 
-module.exports.default = {
-  http: shhHTTP,
-  utils
-};
+module.exports.default = module.exports;

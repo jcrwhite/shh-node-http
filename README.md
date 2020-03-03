@@ -21,9 +21,9 @@ shh-node-http has 0 (zero) dependencies, is under 250 LOC including comments / w
 ## Usage
 
 ```ts
-const { http } = require('shh-node-http');
+const { shh } = require('shh-node-http');
 
-http.post(url: string, body: any, options?: Object)
+shh.post(url: string, body: any, options?: Object)
   .then(response => doSomething(response))
   .catch(e => handleError(e));
 ```
@@ -42,9 +42,9 @@ http.post(url: string, body: any, options?: Object)
 ### plain html get:
 
 ```js
-const { http } = require('shh-node-http');
+const { shh } = require('shh-node-http');
 
-http
+shh
   .get('https://www.google.com/', { json: false })
   .then(response => {
     console.log('status: ', response.statusCode);
@@ -56,9 +56,9 @@ http
 ### passing query parameetrs
 
 ```js
-const { http } = require('shh-node-http');
+const { shh } = require('shh-node-http');
 
-http
+shh
   .get('https://my-cool-rest-api.com/api/v1/users', { params: { name: 'Bob' } })
   .then(response => {
     console.log('status: ', response.statusCode);
@@ -70,8 +70,8 @@ http
 ### REST API post
 
 ```js
-const { http } = require('shh-node-http');
-http
+const { shh } = require('shh-node-http');
+shh
   .post('https://my-cool-rest-api.com/api/v1/users', {
     name: 'Josh',
     email: 'my-email@email.com',
@@ -90,9 +90,9 @@ http
 ### using the raw request wrapper:
 
 ```js
-const { http, utils } = require('shh-node-http');
+const { shh, utils } = require('shh-node-http');
 
-http
+shh
   .request('GET', 'https://www.google.com/', null, { json: false })
   .then(response => utils.assertStatus(response))
   .then(response => {
