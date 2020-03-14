@@ -65,9 +65,7 @@ const shhHTTP = (method = 'GET', url, body = null, options = default_options) =>
   }
   const agent = urlObject.protocol === 'https:' ? secureRequest : request;
   if (body && parsedMethod === 'GET') {
-    throw new Error(
-      `Invalid use of the body parameter while using the ${method.toUpperCase()} method.`
-    );
+    throw new Error(`Invalid use of the body parameter while using the ${method.toUpperCase()} method.`);
   }
   let requestOptions = {
     method: parsedMethod,
@@ -175,9 +173,7 @@ const shhHTTP = (method = 'GET', url, body = null, options = default_options) =>
  * @description A convenience method for making GET requests
  */
 const _get = (url, options) =>
-  shhHTTP('get', url, null, { ...default_options, ...options }).then(response =>
-    assertStatus(response)
-  );
+  shhHTTP('get', url, null, { ...default_options, ...options }).then(response => assertStatus(response));
 
 /**
  * PUT helper
@@ -189,9 +185,7 @@ const _get = (url, options) =>
  * @description A convenience method for making PUT requests
  */
 const _put = (url, body = null, options) =>
-  shhHTTP('put', url, body, { ...default_options, ...options }).then(response =>
-    assertStatus(response)
-  );
+  shhHTTP('put', url, body, { ...default_options, ...options }).then(response => assertStatus(response));
 
 /**
  * PATCH helper
