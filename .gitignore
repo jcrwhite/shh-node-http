@@ -104,6 +104,7 @@ dist
 .tern-port
 
 # Typescript build output
+/lib
 
 # Jest Coverage
 /__coverage__
