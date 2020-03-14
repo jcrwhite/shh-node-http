@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "test": "jest --config jest.config.json",
+    "test": "jest --verbose --config jest.config.json",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "tslint -p tsconfig.json",
@@ -42,6 +42,7 @@
   "homepage": "https://github.com/jcrwhite/shh-node-http#readme",
   "devDependencies": {
     "@types/jest": "^25.1.4",
+    "@types/node": "^13.9.1",
     "jest": "^25.1.0",
     "prettier": "^1.19.1",
     "ts-jest": "^25.2.1",

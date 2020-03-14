@@ -5,11 +5,26 @@
  *
  */
 
-const request = require('http').request;
-const secureRequest = require('https').request;
-const encode = require('querystring').encode;
+import { request } from 'http';
+import { request as secureRequest } from 'https';
+import { encode } from 'querystring';
+import { assertStatus } from './utils';
 
-const { assertStatus } = require('./utils');
+export interface ShhResponse {
+  statusCode: number;
+  statusMessage?: string;
+  headers: { [propName: string]: string };
+  body: any;
+}
+
+export interface ShhOptions {
+  form?: boolean;
+  json?: boolean;
+  timeout?: number;
+  follow_redirects?: boolean;
+  params?: { [propName: string]: string | number };
+  headers?: { [propName: string]: string };
+}
 
 /**
  * The default options for a request
@@ -22,12 +37,13 @@ const { assertStatus } = require('./utils');
  * params: null
  * ```
  */
-const default_options = {
+const defaultOptions: ShhOptions = {
   form: false,
   json: true,
   timeout: 30000,
   follow_redirects: true,
-  params: null
+  params: null as any,
+  headers: {}
 };
 
 /**
@@ -36,7 +52,7 @@ const default_options = {
  * @param {'get'|'put'|'patch'|'post'|'delete'} method HTTP method to use when making the request
  * @param {string} url any valid URL string
  * @param {any} body the HTTP body you with to send (null will result in no body)
- * @param {object|null} options override the `default_options`
+ * @param {ShhOptions|null} options override the `defaultOptions`
  *
  * @description A Promise wrapper around the native Node.JS http(s) ClientRequest api to ease making
  * http(s) requests from the server side.
@@ -54,7 +70,17 @@ const default_options = {
  *  .catch(e => console.error(e));
  * ```
  */
-const shhHTTP = (method = 'GET', url, body = null, options = default_options) => {
+export const shhHTTP: (
+  method: 'get' | 'put' | 'patch' | 'post' | 'delete',
+  url: string,
+  body?: any,
+  options?: ShhOptions
+) => Promise<ShhResponse> = (
+  method: 'get' | 'put' | 'patch' | 'post' | 'delete' = 'get',
+  url: string,
+  body: any = null,
+  options: ShhOptions = defaultOptions
+) => {
   const parsedMethod = method.toUpperCase();
   const parsedParams = !!options.params ? encode(options.params) : null;
   let urlObject;
@@ -67,9 +93,9 @@ const shhHTTP = (method = 'GET', url, body = null, options = default_options) =>
   if (body && parsedMethod === 'GET') {
     throw new Error(`Invalid use of the body parameter while using the ${method.toUpperCase()} method.`);
   }
-  let requestOptions = {
+  const requestOptions: any = {
     method: parsedMethod,
-    headers: options.headers || {},
+    headers: options.headers,
     hostname: urlObject.hostname,
     path: urlObject.pathname,
     protocol: urlObject.protocol,
@@ -102,11 +128,12 @@ const shhHTTP = (method = 'GET', url, body = null, options = default_options) =>
 
   return new Promise((resolve, reject) => {
     const req = agent(requestOptions, res => {
-      const response = {
+      const response: ShhResponse = {
         statusCode: res.statusCode,
+        statusMessage: res.statusMessage,
         headers: res.headers,
         body: ''
-      };
+      } as ShhResponse;
 
       res.setEncoding('utf8');
       res.on('data', chunk => {
@@ -124,7 +151,7 @@ const shhHTTP = (method = 'GET', url, body = null, options = default_options) =>
             reject(e);
           }
         }
-        resolve(response);
+        resolve(response as ShhResponse);
       });
     });
 
@@ -136,8 +163,8 @@ const shhHTTP = (method = 'GET', url, body = null, options = default_options) =>
      */
     req.on('timeout', () => {
       req.abort();
-      let e = new Error('Connection timed out.');
-      e.code = 'ECONNTIMEOUT';
+      const e = new Error('Connection timed out.');
+      (e as any).code = 'ECONNTIMEOUT';
       reject(e);
     });
 
@@ -168,37 +195,37 @@ const shhHTTP = (method = 'GET', url, body = null, options = default_options) =>
  * GET helper
  *
  * @param {string} url valid URL string
- * @param {object|null} options optionally override the package defaults
+ * @param {ShhOptions|null} options optionally override the package defaults
  *
  * @description A convenience method for making GET requests
  */
-const _get = (url, options) =>
-  shhHTTP('get', url, null, { ...default_options, ...options }).then(response => assertStatus(response));
+export const shhGet = (url: string, options: ShhOptions | null) =>
+  shhHTTP('get', url, null, { ...defaultOptions, ...options }).then(response => assertStatus(response));
 
 /**
  * PUT helper
  *
  * @param {string} url valid URL string
  * @param {any} body http body to send
- * @param {object|null} options optionally override package defaults
+ * @param {ShhOptions|null} options optionally override package defaults
  *
  * @description A convenience method for making PUT requests
  */
-const _put = (url, body = null, options) =>
-  shhHTTP('put', url, body, { ...default_options, ...options }).then(response => assertStatus(response));
+export const shhPut = (url: string, body: any = null, options: ShhOptions | null) =>
+  shhHTTP('put', url, body, { ...defaultOptions, ...options }).then(response => assertStatus(response));
 
 /**
  * PATCH helper
  *
  * @param {string} url valid URL string
  * @param {any} body http body to send
- * @param {object|null} options optionally override package defaults
+ * @param {ShhOptions|null} options optionally override package defaults
  *
  * @description A convenience method for making PATCH requests
  */
-const _patch = (url, body = null, options) =>
+export const shhPatch = (url: string, body: any = null, options: ShhOptions | null) =>
   shhHTTP('patch', url, body, {
-    ...default_options,
+    ...defaultOptions,
     ...options
   }).then(response => assertStatus(response));
 
@@ -207,13 +234,13 @@ const _patch = (url, body = null, options) =>
  *
  * @param {string} url valid URL string
  * @param {any} body http body to send
- * @param {object|null} options optionally override package defaults
+ * @param {ShhOptions|null} options optionally override package defaults
  *
  * @description A convenience method for making POST requests
  */
-const _post = (url, body = null, options) =>
+export const shhPost = (url: string, body: any = null, options: ShhOptions | null) =>
   shhHTTP('post', url, body, {
-    ...default_options,
+    ...defaultOptions,
     ...options
   }).then(response => assertStatus(response));
 
@@ -222,21 +249,33 @@ const _post = (url, body = null, options) =>
  *
  * @param {string} url valid URL string
  * @param {any} body http body to send
- * @param {object|null} options optionally override package defaults
+ * @param {ShhOptions|null} options optionally override package defaults
  *
  * @description A convenience method for making DELETE requests
  */
-const _delete = (url, body = null, options) =>
+export const shhDelete = (url: string, body: any = null, options: ShhOptions | null) =>
   shhHTTP('delete', url, body, {
-    ...default_options,
+    ...defaultOptions,
     ...options
   }).then(response => assertStatus(response));
 
-module.exports = {
-  get: _get,
-  put: _put,
-  patch: _patch,
-  post: _post,
-  delete: _delete,
+/**
+ * @description A convenience wrapper around all the Shh HTTP methods
+ *
+ * @example
+ * ```
+ * import { shh } from 'shh-node-http';
+ *
+ * shh.get('https://www.google.com')
+ *  .then(res => console.log(res.body))
+ *  .catch(e => console.error(e))
+ * ```
+ */
+export const shh = {
+  get: shhGet,
+  put: shhPut,
+  patch: shhPatch,
+  post: shhPost,
+  delete: shhDelete,
   request: shhHTTP
 };
