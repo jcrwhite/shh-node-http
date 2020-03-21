@@ -8,12 +8,14 @@
 import { request } from 'http';
 import { request as secureRequest } from 'https';
 import { encode } from 'querystring';
+import { createGunzip, createInflate, createBrotliDecompress } from 'zlib';
 import { assertStatus } from './utils';
 
 export interface ShhResponse {
   statusCode: number;
   statusMessage?: string;
   headers: { [propName: string]: string };
+  raw: Buffer;
   body: any;
 }
 
@@ -27,32 +29,12 @@ export interface ShhOptions {
 }
 
 /**
- * The default options for a request
- *
- * @default ```
- * form: false,
- * json: true,
- * timeout: 30000, // 30 seconds
- * follow_redirects: true,
- * params: null
- * ```
- */
-const defaultOptions: ShhOptions = {
-  form: false,
-  json: true,
-  timeout: 30000,
-  follow_redirects: true,
-  params: null as any,
-  headers: {}
-};
-
-/**
  * A Promise wrapper around the `http(s).ClientRequest`
  *
  * @param {'get'|'put'|'patch'|'post'|'delete'} method HTTP method to use when making the request
  * @param {string} url any valid URL string
  * @param {any} body the HTTP body you with to send (null will result in no body)
- * @param {ShhOptions|null} options override the `defaultOptions`
+ * @param {ShhOptions|undefined} optionsOverride override the `defaultOptions`
  *
  * @description A Promise wrapper around the native Node.JS http(s) ClientRequest api to ease making
  * http(s) requests from the server side.
@@ -74,13 +56,24 @@ export const shhHTTP: (
   method: 'get' | 'put' | 'patch' | 'post' | 'delete',
   url: string,
   body?: any,
-  options?: ShhOptions
+  optionsOverride?: ShhOptions
 ) => Promise<ShhResponse> = (
-  method: 'get' | 'put' | 'patch' | 'post' | 'delete' = 'get',
+  method: 'get' | 'put' | 'patch' | 'post' | 'delete',
   url: string,
-  body: any = null,
-  options: ShhOptions = defaultOptions
+  body?: any,
+  optionsOverride?: ShhOptions | undefined
 ) => {
+  const options = {
+    ...{
+      form: false,
+      json: true,
+      timeout: 30000,
+      follow_redirects: true,
+      params: null as any,
+      headers: {}
+    },
+    ...optionsOverride
+  };
   const parsedMethod = method.toUpperCase();
   const parsedParams = !!options.params ? encode(options.params) : null;
   let urlObject;
@@ -110,17 +103,14 @@ export const shhHTTP: (
   if (options.form && options.json) {
     throw new Error('Request cannot be both type form and type json.');
   }
-  if (options.form) {
-    requestOptions.headers['content-type'] = 'application/x-www-form-urlencoded';
-  }
-  if (options.json) {
-    requestOptions.headers['content-type'] = 'application/json; charset=UTF-8';
-  }
+
   if (body) {
     if (options.json) {
+      requestOptions.headers['content-type'] = 'application/json; charset=UTF-8';
       body = JSON.stringify(body);
     }
     if (options.form) {
+      requestOptions.headers['content-type'] = 'application/x-www-form-urlencoded';
       body = encode(body);
     }
     requestOptions.headers['content-length'] = Buffer.byteLength(body);
@@ -135,12 +125,33 @@ export const shhHTTP: (
         body: ''
       } as ShhResponse;
 
-      res.setEncoding('utf8');
-      res.on('data', chunk => {
-        response.body += chunk;
+      const _raw: Buffer[] = [];
+
+      // res.setEncoding('utf8');
+      let decodedResponse;
+      switch (
+        res.headers['content-encoding'] // or, just use zlib.createUnzip() to handle both cases
+      ) {
+        case 'gzip':
+          decodedResponse = res.pipe(createGunzip());
+          break;
+        case 'deflate':
+          decodedResponse = res.pipe(createInflate());
+          break;
+        case 'br':
+          decodedResponse = res.pipe(createBrotliDecompress());
+          break;
+        default:
+          decodedResponse = res;
+          break;
+      }
+      decodedResponse.on('data', chunk => {
+        _raw.push(chunk);
       });
 
-      res.on('end', () => {
+      decodedResponse.on('end', () => {
+        response.raw = Buffer.concat(_raw);
+        response.body = response.raw.toString();
         /**
          * If we are using JSON, attempt to parse the response
          */
@@ -199,8 +210,8 @@ export const shhHTTP: (
  *
  * @description A convenience method for making GET requests
  */
-export const shhGet = (url: string, options: ShhOptions | null) =>
-  shhHTTP('get', url, null, { ...defaultOptions, ...options }).then(response => assertStatus(response));
+export const shhGet = (url: string, options?: ShhOptions | undefined) =>
+  shhHTTP('get', url, null, options).then(response => assertStatus(response));
 
 /**
  * PUT helper
@@ -211,8 +222,8 @@ export const shhGet = (url: string, options: ShhOptions | null) =>
  *
  * @description A convenience method for making PUT requests
  */
-export const shhPut = (url: string, body: any = null, options: ShhOptions | null) =>
-  shhHTTP('put', url, body, { ...defaultOptions, ...options }).then(response => assertStatus(response));
+export const shhPut = (url: string, body: any = null, options?: ShhOptions | undefined) =>
+  shhHTTP('put', url, body, options).then(response => assertStatus(response));
 
 /**
  * PATCH helper
@@ -223,11 +234,8 @@ export const shhPut = (url: string, body: any = null, options: ShhOptions | null
  *
  * @description A convenience method for making PATCH requests
  */
-export const shhPatch = (url: string, body: any = null, options: ShhOptions | null) =>
-  shhHTTP('patch', url, body, {
-    ...defaultOptions,
-    ...options
-  }).then(response => assertStatus(response));
+export const shhPatch = (url: string, body: any = null, options?: ShhOptions | undefined) =>
+  shhHTTP('patch', url, body, options).then(response => assertStatus(response));
 
 /**
  * POST helper
@@ -238,11 +246,8 @@ export const shhPatch = (url: string, body: any = null, options: ShhOptions | nu
  *
  * @description A convenience method for making POST requests
  */
-export const shhPost = (url: string, body: any = null, options: ShhOptions | null) =>
-  shhHTTP('post', url, body, {
-    ...defaultOptions,
-    ...options
-  }).then(response => assertStatus(response));
+export const shhPost = (url: string, body: any = null, options?: ShhOptions | undefined) =>
+  shhHTTP('post', url, body, options).then(response => assertStatus(response));
 
 /**
  * DELETE helper
@@ -253,11 +258,8 @@ export const shhPost = (url: string, body: any = null, options: ShhOptions | nul
  *
  * @description A convenience method for making DELETE requests
  */
-export const shhDelete = (url: string, body: any = null, options: ShhOptions | null) =>
-  shhHTTP('delete', url, body, {
-    ...defaultOptions,
-    ...options
-  }).then(response => assertStatus(response));
+export const shhDelete = (url: string, body: any = null, options?: ShhOptions | undefined) =>
+  shhHTTP('delete', url, body, options).then(response => assertStatus(response));
 
 /**
  * @description A convenience wrapper around all the Shh HTTP methods
