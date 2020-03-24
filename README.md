@@ -2,6 +2,10 @@
 
 A simple promise wrapper around Node.JS http(s) ClientRequest
 
+[![https://nodei.co/npm/shh-node-http.png?downloads=true&downloadRank=true&stars=true](https://nodei.co/npm/shh-node-http.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/shh-node-http)
+
+[![Node version](https://img.shields.io/node/v/shh-node-http.svg?style=flat)](http://nodejs.org/download/)
+
 ## Simple to use
 
 shh-node-http is designed to be the simplest way to make http calls from your Node application. For convenience it defaults to a Content-Type of JSON and follows redirects.
@@ -17,6 +21,10 @@ It supports:
 ## Minimal
 
 shh-node-http has 0 (zero) dependencies, is under 250 LOC including comments / whitespace, and completely exposes the native Node request / response objects so nothing is hidden from you.
+
+## Compatibility
+
+shh-node-http has full typings and works with TypeScript, esmodule `import`, and the old Node module `require`.
 
 ## Usage
 

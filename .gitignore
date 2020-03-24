@@ -108,3 +108,6 @@ dist
 
 # Jest Coverage
 /__coverage__
+
+# MacOS files
+**/.DS_Store

@@ -22,6 +22,10 @@
     "type": "git",
     "url": "git+https://github.com/jcrwhite/shh-node-http.git"
   },
+  "engines": {
+    "node": ">=10.13.0",
+    "npm": ">=6.4.1"
+  },
   "keywords": [
     "HTTP",
     "HTTPS",
