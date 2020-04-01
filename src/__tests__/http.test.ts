@@ -21,6 +21,11 @@ describe('test shh GET scenarios', () => {
   test.concurrent('GET single, with params in url', () =>
     expect(shh.get(baseURL + 'anything/1234?limit=10&offset=0')).resolves.toHaveProperty('statusCode', 200)
   );
+  test.concurrent('GET with redirect', () =>
+    expect(shh.get(baseURL + 'redirect-to', { params: { url: `${baseURL}anything/1234` } })).resolves.toHaveProperty(
+      'statusCode'
+    )
+  );
 });
 
 describe('test shh PUT scenarios', () => {
@@ -111,17 +116,18 @@ describe('test shh body type handling', () => {
 });
 
 describe('test shh failures', () => {
-  test('GET with improper config', () => {
-    expect(() => shh.get(baseURL + 'get', { form: true, json: true })).toThrow();
-  });
-  test('GET with improper url', () => {
-    expect(() => shh.get('this is a test')).toThrow();
-  });
-  test('GET with disallowed body', () => {
-    expect(() => shh.request('get', baseURL + 'get', { test: 'this is not allowed' })).toThrow();
-  });
+  test.concurrent('GET with improper config', () =>
+    expect(shh.get(baseURL + 'get', { form: true, json: true })).rejects.toThrow()
+  );
+  test.concurrent('GET with improper url', () => expect(shh.get('this is a test')).rejects.toThrow());
+  test.concurrent('GET with disallowed body', () =>
+    expect(shh.request('get', baseURL + 'get', { test: 'this is not allowed' })).rejects.toThrow()
+  );
   test.concurrent('POST with improper returned body', () => expect(shh.post(baseURL + 'html')).rejects.toThrow());
   test.concurrent('GET to unreachable host', () => expect(shh.get('http://localhost:1337')).rejects.toThrow());
+  test.concurrent('GET with improper redirect', () =>
+    expect(shh.get(baseURL + 'redirect-to', { params: { url: `this is a bad URL` } })).rejects.toThrow()
+  );
   test.concurrent('GET timeout', () =>
     expect(
       shh.get(baseURL + 'drip', {

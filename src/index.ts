@@ -63,61 +63,69 @@ export const shhHTTP: (
   body?: any,
   optionsOverride?: ShhOptions | undefined
 ) => {
-  const options = {
-    ...{
-      form: false,
-      json: true,
-      timeout: 30000,
-      follow_redirects: true,
-      params: null as any,
-      headers: {}
-    },
-    ...optionsOverride
-  };
-  const parsedMethod = method.toUpperCase();
-  const parsedParams = !!options.params ? encode(options.params) : null;
-  let urlObject;
-  try {
-    urlObject = new URL(url);
-  } catch (error) {
-    throw new Error(`Invalid url ${url}`);
-  }
-  const agent = urlObject.protocol === 'https:' ? secureRequest : request;
-  if (body && parsedMethod === 'GET') {
-    throw new Error(`Invalid use of the body parameter while using the ${method.toUpperCase()} method.`);
-  }
-  const requestOptions: any = {
-    method: parsedMethod,
-    headers: options.headers,
-    hostname: urlObject.hostname,
-    path: urlObject.pathname,
-    protocol: urlObject.protocol,
-    timeout: options.timeout
-  };
-  if (urlObject.port) {
-    requestOptions.port = +urlObject.port;
-  }
-  if (urlObject.search || parsedParams) {
-    requestOptions.path += `?${parsedParams || urlObject.search}`;
-  }
-  if (options.form && options.json) {
-    throw new Error('Request cannot be both type form and type json.');
-  }
-
-  if (body) {
-    if (options.json) {
-      requestOptions.headers['content-type'] = 'application/json; charset=UTF-8';
-      body = JSON.stringify(body);
-    }
-    if (options.form) {
-      requestOptions.headers['content-type'] = 'application/x-www-form-urlencoded';
-      body = encode(body);
-    }
-    requestOptions.headers['content-length'] = Buffer.byteLength(body);
-  }
-
   return new Promise((resolve, reject) => {
+    const options = {
+      ...{
+        form: false,
+        json: true,
+        timeout: 30000,
+        follow_redirects: true,
+        params: null as any,
+        headers: {}
+      },
+      ...optionsOverride
+    };
+    const parsedMethod = method.toUpperCase();
+    const parsedParams = !!options.params ? encode(options.params) : null;
+    let urlObject;
+    try {
+      urlObject = new URL(url);
+    } catch (error) {
+      return reject(new Error(`Invalid url ${url}`));
+    }
+    const agent = urlObject.protocol === 'https:' ? secureRequest : request;
+    if (body && parsedMethod === 'GET') {
+      return reject(new Error(`Invalid use of the body parameter while using the ${method.toUpperCase()} method.`));
+    }
+    const requestOptions: any = {
+      method: parsedMethod,
+      headers: options.headers,
+      hostname: urlObject.hostname,
+      path: urlObject.pathname,
+      protocol: urlObject.protocol,
+      timeout: options.timeout
+    };
+    if (urlObject.port) {
+      requestOptions.port = +urlObject.port;
+    }
+    if (urlObject.search || parsedParams) {
+      requestOptions.path += `?${parsedParams || urlObject.search}`;
+    }
+    if (options.form && options.json) {
+      return reject(new Error('Request cannot be both type form and type json.'));
+    }
+
+    if (body) {
+      if (options.json) {
+        requestOptions.headers['content-type'] = 'application/json; charset=UTF-8';
+        body = JSON.stringify(body);
+      }
+      if (options.form) {
+        requestOptions.headers['content-type'] = 'application/x-www-form-urlencoded';
+        body = encode(body);
+      }
+      requestOptions.headers['content-length'] = Buffer.byteLength(body);
+    }
+
     const req = agent(requestOptions, res => {
+      // redirect
+      if (options.follow_redirects && res.headers.location) {
+        /* istanbul ignore next */
+        if ([301, 302, 307, 308].includes(res.statusCode as number)) {
+          return resolve(shhHTTP(method, res.headers.location, body, optionsOverride));
+        } // be linient in redirect checking and do not abort
+      }
+
       const response: ShhResponse = {
         statusCode: res.statusCode,
         statusMessage: res.statusMessage,
@@ -127,7 +135,6 @@ export const shhHTTP: (
 
       const _raw: Buffer[] = [];
 
-      // res.setEncoding('utf8');
       let decodedResponse;
       switch (
         res.headers['content-encoding'] // or, just use zlib.createUnzip() to handle both cases
@@ -159,7 +166,7 @@ export const shhHTTP: (
           try {
             response.body = JSON.parse(response.body);
           } catch (e) {
-            reject(e);
+            return reject(e);
           }
         }
         resolve(response as ShhResponse);
