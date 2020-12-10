@@ -1,18 +1,19 @@
 {
   "name": "shh-node-http",
-  "version": "3.1.2",
+  "version": "4.0.0",
   "description": "A simple Promise wrapper around the Node.JS http(s) ClientRequest",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "test": "jest --verbose --config jest.config.json",
+    "start": "tsc && node ./lib/index.js",
+    "test": "jest --detectOpenHandles --verbose --config jest.config.json",
     "build": "tsc",
-    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
-    "lint": "tslint -p tsconfig.json",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run lint",
     "preversion": "npm run lint",
-    "version": "npm run format && git add -A src",
+    "version": "npm run format && git add -A src && conventional-changelog -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md",
     "postversion": "git push && git push --tags"
   },
   "files": [
@@ -23,9 +24,10 @@
     "url": "git+https://github.com/jcrwhite/shh-node-http.git"
   },
   "engines": {
-    "node": ">=10.13.0",
+    "node": ">=12.0.0",
     "npm": ">=6.4.1"
   },
+  "sideEffects": false,
   "keywords": [
     "HTTP",
     "HTTPS",
@@ -45,13 +47,16 @@
   },
   "homepage": "https://github.com/jcrwhite/shh-node-http#readme",
   "devDependencies": {
-    "@types/jest": "^25.1.4",
-    "@types/node": "^13.9.1",
-    "jest": "^25.1.0",
-    "prettier": "^1.19.1",
-    "ts-jest": "^25.2.1",
-    "tslint": "^6.1.0",
-    "tslint-config-prettier": "^1.18.0",
-    "typescript": "^3.8.3"
+    "@types/jest": "^26.0.18",
+    "@types/node": "^14.14.11",
+    "@typescript-eslint/eslint-plugin": "^4.9.1",
+    "@typescript-eslint/parser": "^4.9.1",
+    "eslint": "^7.15.0",
+    "eslint-config-prettier": "^7.0.0",
+    "eslint-plugin-prettier": "^3.2.0",
+    "jest": "^26.6.3",
+    "prettier": "^2.2.1",
+    "ts-jest": "^26.4.4",
+    "typescript": "^4.1.2"
   }
 }

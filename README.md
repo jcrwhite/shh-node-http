@@ -83,7 +83,7 @@ shh
   .post('https://my-cool-rest-api.com/api/v1/users', {
     name: 'Josh',
     email: 'my-email@email.com',
-    password: 'hunter2'
+    password: 'hunter2',
   })
   .then(response => {
     console.log('Created user ', response.body.name);
