@@ -1,6 +1,6 @@
 {
   "name": "shh-node-http",
-  "version": "4.0.0",
+  "version": "3.1.2",
   "description": "A simple Promise wrapper around the Node.JS http(s) ClientRequest",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -47,16 +47,16 @@
   },
   "homepage": "https://github.com/jcrwhite/shh-node-http#readme",
   "devDependencies": {
-    "@types/jest": "^26.0.18",
-    "@types/node": "^14.14.11",
-    "@typescript-eslint/eslint-plugin": "^4.9.1",
-    "@typescript-eslint/parser": "^4.9.1",
-    "eslint": "^7.15.0",
-    "eslint-config-prettier": "^7.0.0",
-    "eslint-plugin-prettier": "^3.2.0",
+    "@types/jest": "^26.0.22",
+    "@types/node": "^14.14.37",
+    "@typescript-eslint/eslint-plugin": "^4.20.0",
+    "@typescript-eslint/parser": "^4.20.0",
+    "eslint": "^7.23.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-prettier": "^3.3.1",
     "jest": "^26.6.3",
     "prettier": "^2.2.1",
-    "ts-jest": "^26.4.4",
-    "typescript": "^4.1.2"
+    "ts-jest": "^26.5.4",
+    "typescript": "^4.2.3"
   }
 }
